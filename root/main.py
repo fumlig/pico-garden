@@ -3,6 +3,7 @@ import network
 import utime as time
 import uasyncio as asyncio
 import uhttp as http
+import control
 import secret
 import utils
 
@@ -12,7 +13,7 @@ wlan = network.WLAN(network.STA_IF)
 pump = machine.PWM(machine.Pin(15))
 moisture = machine.ADC(machine.Pin(26))
 srv = http.Server()
-
+pid = control.PID(1, 0.1, 0, reference=0, output_min=0, output_max=65535)
 
 @srv.route("/")
 async def index(_request):
@@ -51,11 +52,11 @@ async def main():
     asyncio.create_task(srv.start())
 
     while True:
-        print("heartbeat")
-        led.on()
-        await asyncio.sleep_ms(100)
-        led.off()
-        await asyncio.sleep_ms(5000)
+        await asyncio.sleep_ms(1000)
+        input = moisture.read_u16()
+        output = pid.output(input)
+        pump.duty_u16(int(output))
+        print("input:", input, "output:", output, "reference:", pid.reference)
 
 try:
     asyncio.run(main())

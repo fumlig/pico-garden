@@ -1,8 +1,16 @@
 import time
 
 
-def lerp(y0, y1, x, x0=0.0, x1=1.0):
-    return (y0*(x1-x) + y1*(x-x0)) / (x1-x0)
+def lerp(x, y_min, y_max, x_min=0.0, x_max=1.0):
+    return (y_min*(x_max-x) + y_max*(x-x_min)) / (x_max-x_min)
+
+
+def clamp(x, y_min, y_max):
+    if y_min is not None:
+        x = max(x, y_min)
+    if y_max is not None:
+        x = min(x, y_max)
+    return x
 
 
 async def connect(wlan, ssid, key, max_wait=10):
